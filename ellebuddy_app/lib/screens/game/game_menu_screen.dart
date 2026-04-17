@@ -1,3 +1,4 @@
+import 'package:ellebuddy_app/screens/game/keranjang_petualangan.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../widgets/constants.dart';
@@ -143,7 +144,7 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
           ),
           GameCard(
             title: "Kenali Emosiku",
-            imagePath: "images/game_emotion.png",
+            imagePath: "images/game_kenali_emosiku.png",
             backgroundColor: const Color(0xFFC1F9D2),
             onTap: () => Navigator.push(
               context,
@@ -152,9 +153,14 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
           ),
           GameCard(
             title: "Keranjang Petualangan",
-            imagePath: "images/game_basket.png",
+            imagePath: "images/game_keranjang_petualangan.png",
             backgroundColor: const Color(0xFFF0C1F9),
-            onTap: () {},
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const KeranjangPetualanganScreen(),
+              ),
+            ),
           ),
           const SizedBox(height: 20),
         ],

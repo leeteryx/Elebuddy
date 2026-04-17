@@ -135,8 +135,8 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
           _currentIndex++;
           _answered = false;
           _isCorrect = false;
-          _shuffleChoices();
         });
+        _shuffleChoices();
         _feedbackCtrl.reset();
         _starCtrl.reset();
       } else {
@@ -152,8 +152,9 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
       _answered = false;
       _isCorrect = false;
       _gameFinished = false;
-      _shuffleChoices();
     });
+
+    _shuffleChoices();
     _feedbackCtrl.reset();
     _starCtrl.reset();
   }
@@ -166,7 +167,46 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
     );
   }
 
-  // ─── FINISH ──────────────────────────────────────────────────────────────────
+  // ─── TOP BAR (UPDATED) ──────────────────────────────────────────────────────
+
+  Widget _buildTopBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new,
+              size: 24,
+              color: Colors.black54,
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          Row(
+            children: [
+              const Text(
+                'EleBuddy',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Image.asset(
+                'images/elephant_ball.png',
+                height: 36,
+                errorBuilder: (_, __, ___) => const Icon(Icons.pets, size: 36),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── FINISH ─────────────────────────────────────────────────────────────────
 
   Widget _buildFinish() {
     return Center(
@@ -175,11 +215,7 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
         children: [
           const Text(
             'GOOD JOB!!!',
-            style: TextStyle(
-              fontSize: 38,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF333333),
-            ),
+            style: TextStyle(fontSize: 38, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
           Row(
@@ -196,10 +232,7 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
             ),
           ),
           const SizedBox(height: 12),
-          Text(
-            '$_stars dari ${moodQuestions.length} benar!',
-            style: const TextStyle(fontSize: 18, color: Color(0xFF555555)),
-          ),
+          Text('$_stars dari ${moodQuestions.length} benar!'),
           const SizedBox(height: 36),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -225,54 +258,20 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
         backgroundColor: color,
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        elevation: 4,
       ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Colors.black87,
-        ),
-      ),
+      child: Text(label),
     );
   }
 
-  // ─── GAME ─────────────────────────────────────────────────────────────────────
+  // ─── GAME ───────────────────────────────────────────────────────────────────
 
   Widget _buildGame() {
     final q = moodQuestions[_currentIndex];
 
     return Column(
       children: [
-        // TOP BAR
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                icon: const Icon(
-                  Icons.arrow_back_ios_new,
-                  size: 24,
-                  color: Colors.black54,
-                ),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-              Text(
-                'Soal ${_currentIndex + 1} / ${moodQuestions.length}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black54,
-                ),
-              ),
-              const SizedBox(width: 48),
-            ],
-          ),
-        ),
+        _buildTopBar(), // 🔥 sudah diganti
 
-        // GAMBAR ANAK
         Expanded(
           flex: 5,
           child: Stack(
@@ -280,7 +279,7 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Image.asset(q.imagePath, fit: BoxFit.contain),
+                child: Image.asset(q.imagePath),
               ),
               if (_answered)
                 ScaleTransition(
@@ -294,14 +293,12 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
           ),
         ),
 
-        // DIVIDER
         Container(
           height: 2,
           margin: const EdgeInsets.symmetric(horizontal: 24),
           color: Colors.black12,
         ),
 
-        // PILIHAN EMOJI GAMBAR
         Expanded(
           flex: 3,
           child: Row(
@@ -310,24 +307,17 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
           ),
         ),
 
-        // BINTANG PROGRES
         Padding(
           padding: const EdgeInsets.only(bottom: 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(moodQuestions.length, (i) {
               final earned = i < _stars;
-              final isLatest = earned && i == _stars - 1;
-              return ScaleTransition(
-                scale: isLatest
-                    ? _starScale
-                    : const AlwaysStoppedAnimation(1.0),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Text(
-                    earned ? '⭐' : '☆',
-                    style: const TextStyle(fontSize: 30),
-                  ),
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Text(
+                  earned ? '⭐' : '☆',
+                  style: const TextStyle(fontSize: 30),
                 ),
               );
             }),
@@ -336,8 +326,6 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
       ],
     );
   }
-
-  // ─── EMOJI BUTTON ─────────────────────────────────────────────────────────────
 
   Widget _buildEmojiButton(String emojiImagePath) {
     return GestureDetector(
@@ -348,17 +336,10 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.7),
           shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.12),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),
-          child: Image.asset(emojiImagePath, fit: BoxFit.contain),
+          child: Image.asset(emojiImagePath),
         ),
       ),
     );

@@ -36,7 +36,7 @@ final List<Question> screenerQuestions = [
     category: 'Preliminary',
     text: 'Tingkat Kemampuan Berbicara',
     subText: 'Mohon pilih tingkat kemampuan bicara anak anda',
-    imagePath: 'images/elephant_sofa.png',
+    imagePath: 'images/elephant_berbicara.png',
     type: QuestionType.singleChoice,
     options: [
       'Belum bicara',
@@ -50,7 +50,7 @@ final List<Question> screenerQuestions = [
     id: 'q3',
     category: 'Preliminary',
     text: 'Apakah anak Anda pernah dievaluasi oleh seorang terapis?',
-    imagePath: 'images/elephant_talk.png',
+    imagePath: 'images/elephant_terapis.png',
     type: QuestionType.yesNo,
   ),
   Question(
@@ -65,7 +65,7 @@ final List<Question> screenerQuestions = [
     id: 'q5',
     category: 'Cognitive',
     text: 'Apakah anak Anda merespons jika dipanggil dari ruangan lain?',
-    imagePath: 'images/elephant_cognitive.png',
+    imagePath: 'images/elephant_respon.png',
     type: QuestionType.yesNo,
   ),
   Question(

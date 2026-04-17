@@ -115,55 +115,41 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.pink[100],
+      backgroundColor: const Color(0xFF9ED0FF),
       body: SafeArea(child: _gameFinished ? _buildFinish() : _buildGame()),
     );
   }
 
-  // ─── FINISH ───────────────────────────────────────────────────────────────
-
-  Widget _buildFinish() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+  // 🔥 TOP BAR (SAMA SEPERTI SEBELUMNYA)
+  Widget _buildTopBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'GOOD JOB!!!',
-            style: TextStyle(
-              fontSize: 38,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF333333),
+          IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new,
+              size: 24,
+              color: Colors.black54,
             ),
+            onPressed: () => Navigator.of(context).pop(),
           ),
-          const SizedBox(height: 24),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(
-              items.length,
-              (i) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Text(
-                  i < _stars ? '⭐' : '☆',
-                  style: const TextStyle(fontSize: 42),
+            children: [
+              const Text(
+                'EleBuddy',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
                 ),
               ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            '$_stars dari ${items.length} benar!',
-            style: const TextStyle(fontSize: 18, color: Color(0xFF555555)),
-          ),
-          const SizedBox(height: 36),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _actionButton('Main Lagi', const Color(0xFFF9C846), _restart),
-              const SizedBox(width: 16),
-              _actionButton(
-                'Selesai',
-                Colors.white,
-                () => Navigator.of(context).pop(),
+              const SizedBox(width: 6),
+              Image.asset(
+                'images/elephant_ball.png',
+                height: 36,
+                errorBuilder: (_, __, ___) => const Icon(Icons.pets, size: 36),
               ),
             ],
           ),
@@ -172,28 +158,121 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
     );
   }
 
-  Widget _actionButton(String label, Color color, VoidCallback onTap) {
-    return ElevatedButton(
-      onPressed: onTap,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        elevation: 4,
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Colors.black87,
+  // ─── RESULT SCREEN ───────────────────────────────────────────────
+  Widget _buildFinish() {
+    final stars = _stars;
+
+    final messages = [
+      'Yuk coba lagi! 💪',
+      'Hampir! Coba lagi ya! 🌈',
+      'Bagus sekali! 🎉',
+      'Luar biasa! Sempurna! 🌟',
+      'Hebat banget! Kamu jago! 🏆',
+    ];
+
+    return Scaffold(
+      backgroundColor: const Color(0xFF9ED0FF),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildTopBar(), // ✅ pakai top bar baru
+
+            Expanded(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'images/elephant_ball.png',
+                        height: 120,
+                        errorBuilder: (_, __, ___) =>
+                            const Text('🐘', style: TextStyle(fontSize: 80)),
+                      ),
+                      const SizedBox(height: 24),
+
+                      Text(
+                        messages[stars.clamp(0, messages.length - 1)],
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      Text(
+                        'Kamu dapat $stars dari ${items.length} bintang!',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black54,
+                        ),
+                      ),
+
+                      const SizedBox(height: 28),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(items.length, (i) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                            child: Icon(
+                              i < stars ? Icons.star : Icons.star_border,
+                              size: 48,
+                              color: i < stars ? Colors.amber : Colors.white54,
+                            ),
+                          );
+                        }),
+                      ),
+
+                      const SizedBox(height: 40),
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _restart,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF6EC6F5),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: const Text(
+                            'Main Lagi',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Kembali ke Menu'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  // ─── GAME ─────────────────────────────────────────────────────────────────
-
+  // ─── GAME ─────────────────────────────────────────────────
   Widget _buildGame() {
     final item = items[_currentIndex];
     final screenHeight = MediaQuery.of(context).size.height;
@@ -202,44 +281,24 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
 
     return Column(
       children: [
-        // TOP BAR
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                icon: const Icon(
-                  Icons.arrow_back_ios_new,
-                  size: 24,
-                  color: Colors.black54,
-                ),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-              Text(
-                'Soal ${_currentIndex + 1} / ${items.length}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black54,
-                ),
-              ),
-              const SizedBox(width: 48),
-            ],
+        _buildTopBar(), // ✅ pakai top bar baru
+
+        Text(
+          'Soal ${_currentIndex + 1} / ${items.length}',
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.black54,
           ),
         ),
 
-        // NAMA KEGIATAN
+        const SizedBox(height: 8),
+
         Text(
           item.nama,
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF333333),
-          ),
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
 
-        // GAMBAR UTAMA + FEEDBACK
         SizedBox(
           height: screenHeight * 0.35,
           child: Stack(
@@ -247,7 +306,7 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Image.asset(item.gambar, fit: BoxFit.contain),
+                child: Image.asset(item.gambar),
               ),
               if (_answered)
                 ScaleTransition(
@@ -261,7 +320,6 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
           ),
         ),
 
-        // DIVIDER
         Container(
           height: 2,
           margin: const EdgeInsets.symmetric(horizontal: 24),
@@ -270,7 +328,6 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
 
         const SizedBox(height: 16),
 
-        // PILIHAN 2x2 — diperbesar
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
@@ -294,8 +351,8 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
           ),
         ),
 
-        // BINTANG — di bagian bawah layar seperti KenaliEmosiku
         const Spacer(),
+
         Padding(
           padding: const EdgeInsets.only(bottom: 20),
           child: Row(
@@ -322,24 +379,15 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
     );
   }
 
-  // ─── CHOICE BUTTON ────────────────────────────────────────────────────────
-
   Widget _buildChoiceButton(GameItem opt, double size) {
     return GestureDetector(
-      onTap: () => _onAnswer(opt.gambar),
+      onTap: _answered ? null : () => _onAnswer(opt.gambar),
       child: Container(
         width: size,
-        height: size * 0.85, // ← lebih tinggi dari sebelumnya (0.75 → 0.85)
+        height: size * 0.85,
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.7),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.12),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
         ),
         child: Padding(
           padding: const EdgeInsets.all(10),

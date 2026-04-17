@@ -28,23 +28,17 @@ class _PuzzleSosialPageState extends State<PuzzleSosialPage>
       gambarBenar: 'images/sosial_peluk.png',
     ),
     SosialItem(
-      situasi: 'Bertemu orang baru',
-      gambarSoal: 'images/sosial_ketemu.png',
-      gambarBenar: 'images/sosial_salaman.png',
-    ),
-    SosialItem(
       situasi: 'Teman jatuh',
       gambarSoal: 'images/sosial_jatuh.png',
       gambarBenar: 'images/sosial_bantu.png',
     ),
     SosialItem(
-      situasi: 'Mau minta tolong',
-      gambarSoal: 'images/sosial_minta.png',
-      gambarBenar: 'images/sosial_tanya.png',
+      situasi: 'Bingung',
+      gambarSoal: 'images/puzzle_bingung.png',
+      gambarBenar: 'images/puzzle_bantu_bingung.png',
     ),
   ];
 
-  // Pilihan jawaban (gambar benar + 3 gambar salah lainnya)
   List<String> _choices = [];
 
   int _currentIndex = 0;
@@ -88,14 +82,12 @@ class _PuzzleSosialPageState extends State<PuzzleSosialPage>
   }
 
   void _shuffleChoices() {
-    // Ambil semua gambar jawaban, pastikan jawaban benar ada
     final allAnswers = items.map((e) => e.gambarBenar).toList();
     final correct = items[_currentIndex].gambarBenar;
 
-    // Ambil 3 salah dari item lain
     final wrongs = allAnswers.where((g) => g != correct).toList()
       ..shuffle(Random());
-    final choices = [correct, ...wrongs.take(3)];
+    final choices = [correct, ...wrongs.take(2)];
     choices.shuffle(Random());
 
     setState(() {
@@ -149,59 +141,102 @@ class _PuzzleSosialPageState extends State<PuzzleSosialPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFE082), // kuning pastel
+      backgroundColor: const Color(0xFFFFE082),
       body: SafeArea(child: _gameFinished ? _buildFinish() : _buildGame()),
     );
   }
 
-  // ─── FINISH ──────────────────────────────────────────────────
-  Widget _buildFinish() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+  // 🔥 TOP BAR SAMA SEPERTI SEBELUMNYA
+  Widget _buildTopBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'GOOD JOB!!!',
-            style: TextStyle(
-              fontSize: 38,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF333333),
+          IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new,
+              size: 24,
+              color: Colors.black54,
             ),
+            onPressed: () => Navigator.of(context).pop(),
           ),
-          const SizedBox(height: 24),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(
-              items.length,
-              (i) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Text(
-                  i < _stars ? '⭐' : '☆',
-                  style: const TextStyle(fontSize: 42),
+            children: [
+              const Text(
+                'EleBuddy',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
                 ),
               ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            '$_stars dari ${items.length} benar!',
-            style: const TextStyle(fontSize: 18, color: Color(0xFF555555)),
-          ),
-          const SizedBox(height: 36),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _actionButton('Main Lagi', const Color(0xFFF9C846), _restart),
-              const SizedBox(width: 16),
-              _actionButton(
-                'Selesai',
-                Colors.white,
-                () => Navigator.of(context).pop(),
+              const SizedBox(width: 6),
+              Image.asset(
+                'images/elephant_ball.png',
+                height: 36,
+                errorBuilder: (_, __, ___) => const Icon(Icons.pets, size: 36),
               ),
             ],
           ),
+          const SizedBox(width: 48), // biar balance kanan-kiri
         ],
       ),
+    );
+  }
+
+  // ─── FINISH ─────────────────────────────────────────────
+  Widget _buildFinish() {
+    return Column(
+      children: [
+        _buildTopBar(),
+        Expanded(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'GOOD JOB!!!',
+                  style: TextStyle(fontSize: 38, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    items.length,
+                    (i) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Text(
+                        i < _stars ? '⭐' : '☆',
+                        style: const TextStyle(fontSize: 42),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text('$_stars dari ${items.length} benar!'),
+                const SizedBox(height: 36),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _actionButton(
+                      'Main Lagi',
+                      const Color(0xFFF9C846),
+                      _restart,
+                    ),
+                    const SizedBox(width: 16),
+                    _actionButton(
+                      'Selesai',
+                      Colors.white,
+                      () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -212,73 +247,42 @@ class _PuzzleSosialPageState extends State<PuzzleSosialPage>
         backgroundColor: color,
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        elevation: 4,
       ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Colors.black87,
-        ),
-      ),
+      child: Text(label),
     );
   }
 
-  // ─── GAME ────────────────────────────────────────────────────
+  // ─── GAME ─────────────────────────────────────────────
   Widget _buildGame() {
     final item = items[_currentIndex];
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    final cardSize = (screenWidth - 24 * 2 - 12) / 2;
+    final cardSize = (screenWidth - 24 * 2 - 12 * 2) / 3;
 
     return Column(
       children: [
-        // TOP BAR
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                icon: const Icon(
-                  Icons.arrow_back_ios_new,
-                  size: 24,
-                  color: Colors.black54,
-                ),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-              Text(
-                'Soal ${_currentIndex + 1} / ${items.length}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black54,
-                ),
-              ),
-              const SizedBox(width: 48),
-            ],
+        _buildTopBar(),
+
+        Text(
+          'Soal ${_currentIndex + 1} / ${items.length}',
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.black54,
           ),
         ),
 
-        // SITUASI / PERTANYAAN
+        const SizedBox(height: 8),
+
         Text(
           item.situasi,
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF333333),
-          ),
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
         ),
 
         const SizedBox(height: 8),
-        const Text(
-          'Apa yang harus dilakukan?',
-          style: TextStyle(fontSize: 14, color: Colors.black54),
-        ),
+        const Text('Apa yang harus dilakukan?'),
 
-        // GAMBAR SOAL + FEEDBACK
         SizedBox(
           height: screenHeight * 0.32,
           child: Stack(
@@ -286,7 +290,7 @@ class _PuzzleSosialPageState extends State<PuzzleSosialPage>
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Image.asset(item.gambarSoal, fit: BoxFit.contain),
+                child: Image.asset(item.gambarSoal),
               ),
               if (_answered)
                 ScaleTransition(
@@ -300,7 +304,6 @@ class _PuzzleSosialPageState extends State<PuzzleSosialPage>
           ),
         ),
 
-        // DIVIDER
         Container(
           height: 2,
           margin: const EdgeInsets.symmetric(horizontal: 24),
@@ -309,32 +312,20 @@ class _PuzzleSosialPageState extends State<PuzzleSosialPage>
 
         const SizedBox(height: 16),
 
-        // PILIHAN 2x2
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  _buildChoiceButton(_choices[0], cardSize),
-                  const SizedBox(width: 12),
-                  _buildChoiceButton(_choices[1], cardSize),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  _buildChoiceButton(_choices[2], cardSize),
-                  const SizedBox(width: 12),
-                  _buildChoiceButton(_choices[3], cardSize),
-                ],
-              ),
+              _buildChoiceButton(_choices[0], cardSize),
+              _buildChoiceButton(_choices[1], cardSize),
+              _buildChoiceButton(_choices[2], cardSize),
             ],
           ),
         ),
 
-        // BINTANG BAWAH
         const Spacer(),
+
         Padding(
           padding: const EdgeInsets.only(bottom: 20),
           child: Row(
@@ -361,23 +352,15 @@ class _PuzzleSosialPageState extends State<PuzzleSosialPage>
     );
   }
 
-  // ─── CHOICE BUTTON ───────────────────────────────────────────
   Widget _buildChoiceButton(String gambar, double size) {
     return GestureDetector(
-      onTap: () => _onAnswer(gambar),
+      onTap: _answered ? null : () => _onAnswer(gambar),
       child: Container(
         width: size,
         height: size * 0.85,
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.7),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.12),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
         ),
         child: Padding(
           padding: const EdgeInsets.all(10),
