@@ -266,8 +266,15 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
     );
   }
 
-  // ─── HELPER: streak widget ────────────────────────────────────
+  // ─── HELPER: streak widget (Dinamis Sesuai Hari Ini) ──────────
   Widget _buildStreakSection() {
+    // Ambil data waktu sekarang
+    final now = DateTime.now();
+    final currentWeekday = now.weekday; // 1 = Senin, ..., 7 = Minggu
+
+    // Label hari sesuai urutan di Drawer kamu (Senin sampai Minggu)
+    final List<String> daysLabel = ["S", "S", "R", "K", "J", "S", "M"];
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
@@ -286,7 +293,16 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(7, (i) {
-              final isActive = i < _streakCount;
+              // Logika:
+              // i = indeks (0-6)
+              // currentWeekday = hari ini (1-7)
+              // index + 1 karena hari di Dart mulai dari 1 (Senin)
+              final bool isToday = (i + 1) == currentWeekday;
+
+              // Streak aktif jika indeks kurang dari atau sama dengan hari ini (asumsi user login tiap hari)
+              // Atau kamu bisa tetap pakai _streakCount kamu jika ingin data dari database
+              final bool isActive = (i + 1) <= _streakCount;
+
               return Column(
                 children: [
                   Container(
@@ -294,24 +310,37 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
                     height: 32,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: isActive
+                      // Warna primer jika hari ini, warna pudar jika sudah lewat, abu-abu jika belum
+                      color: isToday
                           ? AppColors.primary
-                          : Colors.grey.withOpacity(0.2),
+                          : (isActive
+                                ? AppColors.primary.withOpacity(0.5)
+                                : Colors.grey.withOpacity(0.2)),
+                      border: isToday
+                          ? Border.all(color: Colors.amber, width: 2)
+                          : null,
                     ),
                     child: Center(
                       child: Text(
-                        ["S", "M", "S", "R", "K", "J", "S"][i],
+                        daysLabel[i],
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: isActive ? Colors.white : Colors.grey,
+                          color: (isActive || isToday)
+                              ? Colors.white
+                              : Colors.grey,
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 4),
-                  if (isActive)
-                    const Icon(Icons.star, size: 12, color: Colors.amber),
+                  // Munculkan bintang hanya di hari ini
+                  if (isToday)
+                    const Icon(Icons.star, size: 12, color: Colors.amber)
+                  else
+                    const SizedBox(
+                      height: 12,
+                    ), // Placeholder biar jarak tetap sama
                 ],
               );
             }),
@@ -320,7 +349,7 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
           Text(
             _streakCompleted
                 ? "🎉 Streak 7 hari tercapai!"
-                : "$_streakCount/7 hari — terus semangat!",
+                : "$currentWeekday/7 hari — terus semangat!", // Teks ikut hari sekarang
             style: TextStyle(
               fontSize: 12,
               color: _streakCompleted ? AppColors.primary : Colors.grey,

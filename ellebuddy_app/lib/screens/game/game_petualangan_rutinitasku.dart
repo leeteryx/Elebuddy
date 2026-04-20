@@ -19,9 +19,12 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
     with TickerProviderStateMixin {
   final List<GameItem> items = [
     GameItem('Bangun Tidur', 'images/bangun_tidur.png'),
+    GameItem('Sikat Gigi', 'images/sikat_gigi.png'),
+    GameItem('Cuci Tangan', 'images/cuci_tangan.png'),
     GameItem('Sarapan', 'images/sarapan.png'),
     GameItem('Menyapu', 'images/menyapu.png'),
-    GameItem('Sikat Gigi', 'images/sikat_gigi.png'),
+    GameItem('Membaca Buku', 'images/baca_buku.png'),
+    GameItem('Gosok Gigi', 'images/gosok_gigi.png'),
   ];
 
   int _currentIndex = 0;
@@ -66,7 +69,10 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
   }
 
   void _shuffleChoices() {
-    _choices = List.from(items)..shuffle(Random());
+    final correct = items[_currentIndex];
+    final others = List.from(items)..remove(correct);
+    others.shuffle(Random());
+    _choices = ([correct, ...others.take(3)])..shuffle(Random());
   }
 
   void _onAnswer(String selectedGambar) {
@@ -120,7 +126,6 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
     );
   }
 
-  // 🔥 TOP BAR (SAMA SEPERTI SEBELUMNYA)
   Widget _buildTopBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -135,30 +140,46 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
             ),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          Row(
+          Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'EleBuddy',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'EleBuddy',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Image.asset(
+                    'images/elephant_ball.png',
+                    height: 36,
+                    errorBuilder: (_, __, ___) =>
+                        const Icon(Icons.pets, size: 36),
+                  ),
+                ],
               ),
-              const SizedBox(width: 6),
-              Image.asset(
-                'images/elephant_ball.png',
-                height: 36,
-                errorBuilder: (_, __, ___) => const Icon(Icons.pets, size: 36),
+              const SizedBox(height: 2),
+              Text(
+                'Soal ${_currentIndex + 1} / ${items.length}',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
+          const SizedBox(width: 48),
         ],
       ),
     );
   }
 
-  // ─── RESULT SCREEN ───────────────────────────────────────────────
   Widget _buildFinish() {
     final stars = _stars;
 
@@ -175,8 +196,7 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
       body: SafeArea(
         child: Column(
           children: [
-            _buildTopBar(), // ✅ pakai top bar baru
-
+            _buildTopBar(),
             Expanded(
               child: Center(
                 child: Padding(
@@ -191,7 +211,6 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
                             const Text('🐘', style: TextStyle(fontSize: 80)),
                       ),
                       const SizedBox(height: 24),
-
                       Text(
                         messages[stars.clamp(0, messages.length - 1)],
                         style: const TextStyle(
@@ -201,9 +220,7 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
                         ),
                         textAlign: TextAlign.center,
                       ),
-
                       const SizedBox(height: 8),
-
                       Text(
                         'Kamu dapat $stars dari ${items.length} bintang!',
                         style: const TextStyle(
@@ -211,9 +228,7 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
                           color: Colors.black54,
                         ),
                       ),
-
                       const SizedBox(height: 28),
-
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(items.length, (i) {
@@ -227,9 +242,7 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
                           );
                         }),
                       ),
-
                       const SizedBox(height: 40),
-
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -251,9 +264,7 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 12),
-
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton(
@@ -272,35 +283,20 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
     );
   }
 
-  // ─── GAME ─────────────────────────────────────────────────
   Widget _buildGame() {
     final item = items[_currentIndex];
     final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final cardSize = (screenWidth - 24 * 2 - 12) / 2;
 
     return Column(
       children: [
-        _buildTopBar(), // ✅ pakai top bar baru
-
-        Text(
-          'Soal ${_currentIndex + 1} / ${items.length}',
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.black54,
-          ),
-        ),
-
+        _buildTopBar(),
         const SizedBox(height: 8),
-
         Text(
           item.nama,
           style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
-
         SizedBox(
-          height: screenHeight * 0.35,
+          height: screenHeight * 0.32,
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -319,49 +315,38 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
             ],
           ),
         ),
-
         Container(
           height: 2,
           margin: const EdgeInsets.symmetric(horizontal: 24),
           color: Colors.black12,
         ),
-
         const SizedBox(height: 16),
-
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  _buildChoiceButton(_choices[0], cardSize),
-                  const SizedBox(width: 12),
-                  _buildChoiceButton(_choices[1], cardSize),
-                ],
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: GridView.builder(
+              itemCount: _choices.length,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 1.1,
               ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  _buildChoiceButton(_choices[2], cardSize),
-                  const SizedBox(width: 12),
-                  _buildChoiceButton(_choices[3], cardSize),
-                ],
-              ),
-            ],
+              itemBuilder: (context, index) {
+                return _buildChoiceButton(_choices[index]);
+              },
+            ),
           ),
         ),
-
-        const Spacer(),
-
         Padding(
           padding: const EdgeInsets.only(bottom: 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(items.length, (i) {
               final earned = i < _stars;
-              final isLatest = earned && i == _stars - 1;
               return ScaleTransition(
-                scale: isLatest
+                scale: (earned && i == _stars - 1)
                     ? _starScale
                     : const AlwaysStoppedAnimation(1.0),
                 child: Padding(
@@ -379,12 +364,10 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
     );
   }
 
-  Widget _buildChoiceButton(GameItem opt, double size) {
+  Widget _buildChoiceButton(GameItem opt) {
     return GestureDetector(
       onTap: _answered ? null : () => _onAnswer(opt.gambar),
       child: Container(
-        width: size,
-        height: size * 0.85,
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.7),
           borderRadius: BorderRadius.circular(16),

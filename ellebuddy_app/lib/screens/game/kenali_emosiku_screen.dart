@@ -40,14 +40,14 @@ final List<MoodQuestion> moodQuestions = [
     mood: 'Sedih',
     imagePath: 'images/nangis.png',
     correctEmojiImage: 'images/emonangis.png',
-    wrongEmojiImage: 'images/emomarah.png',
+    wrongEmojiImage: 'images/emotakut.png',
   ),
   MoodQuestion(
     id: 'mq4',
     mood: 'Takut',
     imagePath: 'images/takut.png',
     correctEmojiImage: 'images/emotakut.png',
-    wrongEmojiImage: 'images/emosenang.png',
+    wrongEmojiImage: 'images/emokaget.png',
   ),
   MoodQuestion(
     id: 'mq5',
@@ -55,6 +55,27 @@ final List<MoodQuestion> moodQuestions = [
     imagePath: 'images/kaget.png',
     correctEmojiImage: 'images/emokaget.png',
     wrongEmojiImage: 'images/emomarah.png',
+  ),
+  MoodQuestion(
+    id: 'mq6',
+    mood: 'Malu',
+    imagePath: 'images/anak_malu.png',
+    correctEmojiImage: 'images/emosi_malu.png',
+    wrongEmojiImage: 'images/emosi_bingung.png',
+  ),
+  MoodQuestion(
+    id: 'mq7',
+    mood: 'Bingung',
+    imagePath: 'images/anak_bingung.png',
+    correctEmojiImage: 'images/emosi_bingung.png',
+    wrongEmojiImage: 'images/emosi_malu.png',
+  ),
+  MoodQuestion(
+    id: 'mq8',
+    mood: 'Terkejut',
+    imagePath: 'images/anak_terkejut.png',
+    correctEmojiImage: 'images/emosi_terkejut.png',
+    wrongEmojiImage: 'images/emosi_malu.png',
   ),
 ];
 
@@ -183,24 +204,45 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
             ),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          Row(
+          // Bagian Tengah: Judul dan Progress Soal
+          Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'EleBuddy',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'EleBuddy',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Image.asset(
+                    'images/elephant_ball.png',
+                    height: 36,
+                    errorBuilder: (_, __, ___) =>
+                        const Icon(Icons.pets, size: 36),
+                  ),
+                ],
               ),
-              const SizedBox(width: 6),
-              Image.asset(
-                'images/elephant_ball.png',
-                height: 36,
-                errorBuilder: (_, __, ___) => const Icon(Icons.pets, size: 36),
+              const SizedBox(
+                height: 4,
+              ), // Jarak sedikit antara nama dan nomor soal
+              Text(
+                'Soal ${_currentIndex + 1} / ${moodQuestions.length}',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
+          // Spacer untuk menyeimbangkan posisi tengah karena ada tombol back di kiri
+          const SizedBox(width: 48),
         ],
       ),
     );
@@ -209,57 +251,141 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
   // ─── FINISH ─────────────────────────────────────────────────────────────────
 
   Widget _buildFinish() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            'GOOD JOB!!!',
-            style: TextStyle(fontSize: 38, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(
-              moodQuestions.length,
-              (i) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Text(
-                  i < _stars ? '⭐' : '☆',
-                  style: const TextStyle(fontSize: 42),
-                ),
+    final stars = _stars;
+
+    // Pesan berdasarkan jumlah bintang
+    String message = 'Bagus sekali! 🎉';
+    if (stars == moodQuestions.length) {
+      message = 'Luar biasa! Sempurna! 🌟';
+    } else if (stars == 0) {
+      message = 'Yuk coba lagi! 💪';
+    }
+
+    return Scaffold(
+      backgroundColor: const Color(
+        0xFFC1F9D2,
+      ), // Warna hijau asli tetap dipertahankan
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildTopBar(), // Menampilkan TopBar konsisten
+
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Maskot Gajah Tengah
+                  Image.asset(
+                    'images/elephant_ball.png',
+                    height: 180,
+                    errorBuilder: (_, __, ___) =>
+                        const Text('🐘', style: TextStyle(fontSize: 100)),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // Teks Pesan Utama
+                  Text(
+                    message,
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // Sub-teks statistik
+                  Text(
+                    'Kamu dapat $stars dari ${moodQuestions.length} benar!',
+                    style: const TextStyle(fontSize: 18, color: Colors.black54),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // Barisan Bintang Besar
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(moodQuestions.length, (i) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Icon(
+                          i < stars ? Icons.star : Icons.star_border,
+                          size: 52,
+                          color: i < stars
+                              ? Colors.amber
+                              : Colors.white.withOpacity(0.6),
+                        ),
+                      );
+                    }),
+                  ),
+                ],
               ),
             ),
-          ),
-          const SizedBox(height: 12),
-          Text('$_stars dari ${moodQuestions.length} benar!'),
-          const SizedBox(height: 36),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _actionButton('Main Lagi', const Color(0xFFF9C846), _restart),
-              const SizedBox(width: 16),
-              _actionButton(
-                'Selesai',
-                Colors.white,
-                () => Navigator.of(context).pop(),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _actionButton(String label, Color color, VoidCallback onTap) {
-    return ElevatedButton(
-      onPressed: onTap,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+            // Bagian Tombol di Bawah (Dibuat memanjang sesuai gambar referensi)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+              child: Column(
+                children: [
+                  // Tombol Main Lagi
+                  SizedBox(
+                    width: double.infinity,
+                    height: 55,
+                    child: ElevatedButton(
+                      onPressed: _restart,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(
+                          0xFFF9C846,
+                        ), // Warna kuning tombol asli
+                        foregroundColor: Colors.black87,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: const Text(
+                        'Main Lagi',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Tombol Selesai/Kembali
+                  SizedBox(
+                    width: double.infinity,
+                    height: 55,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.white, width: 2),
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.white.withOpacity(0.2),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: const Text(
+                        'Selesai',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-      child: Text(label),
     );
   }
 

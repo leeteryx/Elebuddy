@@ -178,6 +178,8 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
 
   Widget _buildGame() {
     final q = _questionsShuffled[_currentIndex];
+    // Mengambil ukuran layar untuk pembatas maksimal
+    final double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5C2E0),
@@ -188,42 +190,69 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
 
             Text(
               'Soal ${_currentIndex + 1} / ${_questionsShuffled.length}',
-              style: const TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16, color: Colors.black54),
+            ),
+
+            const SizedBox(height: 8),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                q.question,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+
+            // --- AREA GAMBAR DINAMIS ---
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          // Memastikan gambar tidak terlalu raksasa di tablet
+                          maxHeight: screenHeight * 0.4,
+                        ),
+                        child: Image.asset(
+                          q.strukImage,
+                          fit: BoxFit.contain, // Ukuran dinamis mengikuti ruang
+                          errorBuilder: (_, __, ___) =>
+                              const Icon(Icons.receipt_long, size: 100),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            // ---------------------------
+
+            // Bagian Pilihan Jawaban
+            _buildOptions(q),
+
+            // Area Feedback (Bintang/Silang) agar tidak merusak layout
+            SizedBox(
+              height: 100,
+              child: Center(
+                child: _answered
+                    ? ScaleTransition(
+                        scale: _feedbackScale,
+                        child: Text(
+                          _isCorrect ? '⭐' : '❌',
+                          style: const TextStyle(fontSize: 80),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
             ),
 
             const SizedBox(height: 10),
-
-            Text(
-              q.question,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: 12),
-
-            Image.asset(
-              q.strukImage,
-              height: 200,
-              errorBuilder: (_, __, ___) =>
-                  const Icon(Icons.receipt_long, size: 100),
-            ),
-
-            const SizedBox(height: 20),
-
-            _buildOptions(q),
-
-            const Spacer(),
-
-            if (_answered)
-              ScaleTransition(
-                scale: _feedbackScale,
-                child: Text(
-                  _isCorrect ? '⭐' : '❌',
-                  style: const TextStyle(fontSize: 80),
-                ),
-              ),
-
-            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -269,36 +298,145 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
   // ─── RESULT ─────────────────────────────────────────
 
   Widget _buildResult() {
+    final stars = _stars;
+
+    // Pesan berdasarkan jumlah bintang
+    String message = 'Bagus sekali! 🎉';
+    if (stars == _questions.length) {
+      message = 'Luar biasa! Sempurna! 🌟';
+    } else if (stars == 0) {
+      message = 'Yuk coba lagi! 💪';
+    }
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5C2E0),
+      backgroundColor: const Color(
+        0xFFF5C2E0,
+      ), // Warna pink asli tetap dipertahankan
       body: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'GOOD JOB!',
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+        child: Column(
+          children: [
+            _buildTopBar(), // Konsistensi dengan menampilkan TopBar
+
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Maskot Gajah Tengah
+                  Image.asset(
+                    'images/elephant_ball.png',
+                    height: 180,
+                    errorBuilder: (_, __, ___) =>
+                        const Text('🐘', style: TextStyle(fontSize: 100)),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // Teks Pesan Utama
+                  Text(
+                    message,
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // Sub-teks statistik
+                  Text(
+                    'Kamu dapat $stars dari ${_questions.length} benar!',
+                    style: const TextStyle(fontSize: 18, color: Colors.black54),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // Barisan Bintang Besar
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(_questions.length, (i) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: Icon(
+                          i < stars ? Icons.star : Icons.star_border,
+                          size: 48,
+                          color: i < stars
+                              ? Colors.amber
+                              : Colors.white.withOpacity(0.6),
+                        ),
+                      );
+                    }),
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-              Text('$_stars / ${_questions.length} benar'),
-              const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: _restart,
-                child: const Text('Main Lagi'),
+            ),
+
+            // Bagian Tombol di Bawah (Dibuat memanjang)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+              child: Column(
+                children: [
+                  // Tombol Main Lagi
+                  SizedBox(
+                    width: double.infinity,
+                    height: 55,
+                    child: ElevatedButton(
+                      onPressed: _restart,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(
+                          0xFF6EC6F5,
+                        ), // Warna biru tombol cerah
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: const Text(
+                        'Main Lagi',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Tombol Kembali
+                  SizedBox(
+                    width: double.infinity,
+                    height: 55,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.white, width: 2),
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.white.withOpacity(0.2),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: const Text(
+                        'Kembali ke Menu',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Kembali'),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  // ─── TOP BAR (SUDAH DISAMAKAN) ───────────────────────
+  // ─── TOP BAR ───────────────────────
 
   Widget _buildTopBar() {
     return Padding(
