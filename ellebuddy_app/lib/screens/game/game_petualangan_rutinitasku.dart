@@ -229,19 +229,32 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
                         ),
                       ),
                       const SizedBox(height: 28),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(items.length, (i) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 6),
-                            child: Icon(
-                              i < stars ? Icons.star : Icons.star_border,
-                              size: 48,
-                              color: i < stars ? Colors.amber : Colors.white54,
-                            ),
+
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final starSize =
+                              (constraints.maxWidth / items.length - 12).clamp(
+                                24.0,
+                                52.0,
+                              );
+
+                          return Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: 6,
+                            runSpacing: 6,
+                            children: List.generate(items.length, (i) {
+                              return Icon(
+                                i < stars ? Icons.star : Icons.star_border,
+                                size: starSize,
+                                color: i < stars
+                                    ? Colors.amber
+                                    : Colors.white54,
+                              );
+                            }),
                           );
-                        }),
+                        },
                       ),
+
                       const SizedBox(height: 40),
                       SizedBox(
                         width: double.infinity,
@@ -339,25 +352,34 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
             ),
           ),
         ),
+
         Padding(
-          padding: const EdgeInsets.only(bottom: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(items.length, (i) {
-              final earned = i < _stars;
-              return ScaleTransition(
-                scale: (earned && i == _stars - 1)
-                    ? _starScale
-                    : const AlwaysStoppedAnimation(1.0),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Text(
-                    earned ? '⭐' : '☆',
-                    style: const TextStyle(fontSize: 30),
-                  ),
-                ),
+          padding: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final starSize = (constraints.maxWidth / items.length - 12).clamp(
+                20.0,
+                30.0,
               );
-            }),
+
+              return Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 4,
+                runSpacing: 4,
+                children: List.generate(items.length, (i) {
+                  final earned = i < _stars;
+                  return ScaleTransition(
+                    scale: (earned && i == _stars - 1)
+                        ? _starScale
+                        : const AlwaysStoppedAnimation(1.0),
+                    child: Text(
+                      earned ? '⭐' : '☆',
+                      style: TextStyle(fontSize: starSize),
+                    ),
+                  );
+                }),
+              );
+            },
           ),
         ),
       ],

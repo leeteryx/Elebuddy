@@ -105,6 +105,8 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
 
   late AnimationController _feedbackController;
   late Animation<double> _feedbackScale;
+  late AnimationController _starCtrl;
+  late Animation<double> _starScale;
 
   @override
   void initState() {
@@ -116,16 +118,22 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-
     _feedbackScale = CurvedAnimation(
       parent: _feedbackController,
       curve: Curves.elasticOut,
     );
+
+    _starCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _starScale = CurvedAnimation(parent: _starCtrl, curve: Curves.elasticOut);
   }
 
   @override
   void dispose() {
     _feedbackController.dispose();
+    _starCtrl.dispose();
     super.dispose();
   }
 
@@ -139,6 +147,7 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
     });
 
     _feedbackController.forward(from: 0);
+    if (correct) _starCtrl.forward(from: 0);
 
     Future.delayed(const Duration(milliseconds: 1200), () {
       if (!mounted) return;
@@ -150,6 +159,7 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
           _isCorrect = false;
         });
         _feedbackController.reset();
+        _starCtrl.reset();
       } else {
         setState(() => _finished = true);
       }
@@ -166,6 +176,7 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
       _finished = false;
     });
     _feedbackController.reset();
+    _starCtrl.reset();
   }
 
   @override
@@ -178,7 +189,6 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
 
   Widget _buildGame() {
     final q = _questionsShuffled[_currentIndex];
-    // Mengambil ukuran layar untuk pembatas maksimal
     final double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
@@ -188,26 +198,63 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
           children: [
             _buildTopBar(),
 
-            Text(
-              'Soal ${_currentIndex + 1} / ${_questionsShuffled.length}',
-              style: const TextStyle(fontSize: 16, color: Colors.black54),
+            // Soal + nomor
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  Text(
+                    'Soal ${_currentIndex + 1} / ${_questionsShuffled.length}',
+                    style: const TextStyle(fontSize: 16, color: Colors.black54),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    q.question,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
 
             const SizedBox(height: 8),
 
+            // ✅ PROGRESS BINTANG DINAMIS - di bawah soal
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                q.question,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final starSize =
+                      (constraints.maxWidth / _questionsShuffled.length - 12)
+                          .clamp(18.0, 28.0);
+
+                  return Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: List.generate(_questionsShuffled.length, (i) {
+                      final earned = i < _stars;
+                      return ScaleTransition(
+                        scale: (earned && i == _stars - 1)
+                            ? _starScale
+                            : const AlwaysStoppedAnimation(1.0),
+                        child: Text(
+                          earned ? '⭐' : '☆',
+                          style: TextStyle(fontSize: starSize),
+                        ),
+                      );
+                    }),
+                  );
+                },
               ),
             ),
 
-            // --- AREA GAMBAR DINAMIS ---
+            const SizedBox(height: 8),
+
+            // Gambar struk
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
@@ -216,12 +263,11 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
                     child: Center(
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
-                          // Memastikan gambar tidak terlalu raksasa di tablet
                           maxHeight: screenHeight * 0.4,
                         ),
                         child: Image.asset(
                           q.strukImage,
-                          fit: BoxFit.contain, // Ukuran dinamis mengikuti ruang
+                          fit: BoxFit.contain,
                           errorBuilder: (_, __, ___) =>
                               const Icon(Icons.receipt_long, size: 100),
                         ),
@@ -231,14 +277,13 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
                 },
               ),
             ),
-            // ---------------------------
 
-            // Bagian Pilihan Jawaban
+            // Pilihan jawaban
             _buildOptions(q),
 
-            // Area Feedback (Bintang/Silang) agar tidak merusak layout
+            // Feedback bintang/silang
             SizedBox(
-              height: 100,
+              height: 90,
               child: Center(
                 child: _answered
                     ? ScaleTransition(
@@ -300,7 +345,6 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
   Widget _buildResult() {
     final stars = _stars;
 
-    // Pesan berdasarkan jumlah bintang
     String message = 'Bagus sekali! 🎉';
     if (stars == _questions.length) {
       message = 'Luar biasa! Sempurna! 🌟';
@@ -309,19 +353,16 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
     }
 
     return Scaffold(
-      backgroundColor: const Color(
-        0xFFF5C2E0,
-      ), // Warna pink asli tetap dipertahankan
+      backgroundColor: const Color(0xFFF5C2E0),
       body: SafeArea(
         child: Column(
           children: [
-            _buildTopBar(), // Konsistensi dengan menampilkan TopBar
+            _buildTopBar(),
 
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Maskot Gajah Tengah
                   Image.asset(
                     'images/elephant_ball.png',
                     height: 180,
@@ -331,7 +372,6 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
 
                   const SizedBox(height: 30),
 
-                  // Teks Pesan Utama
                   Text(
                     message,
                     style: const TextStyle(
@@ -343,7 +383,6 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
 
                   const SizedBox(height: 10),
 
-                  // Sub-teks statistik
                   Text(
                     'Kamu dapat $stars dari ${_questions.length} benar!',
                     style: const TextStyle(fontSize: 18, color: Colors.black54),
@@ -351,41 +390,47 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
 
                   const SizedBox(height: 30),
 
-                  // Barisan Bintang Besar
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(_questions.length, (i) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                        child: Icon(
-                          i < stars ? Icons.star : Icons.star_border,
-                          size: 48,
-                          color: i < stars
-                              ? Colors.amber
-                              : Colors.white.withOpacity(0.6),
-                        ),
-                      );
-                    }),
+                  // ✅ BINTANG DINAMIS RESULT
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final starSize =
+                            (constraints.maxWidth / _questions.length - 12)
+                                .clamp(24.0, 52.0);
+
+                        return Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: List.generate(_questions.length, (i) {
+                            return Icon(
+                              i < stars ? Icons.star : Icons.star_border,
+                              size: starSize,
+                              color: i < stars
+                                  ? Colors.amber
+                                  : Colors.white.withOpacity(0.6),
+                            );
+                          }),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
             ),
 
-            // Bagian Tombol di Bawah (Dibuat memanjang)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
               child: Column(
                 children: [
-                  // Tombol Main Lagi
                   SizedBox(
                     width: double.infinity,
                     height: 55,
                     child: ElevatedButton(
                       onPressed: _restart,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(
-                          0xFF6EC6F5,
-                        ), // Warna biru tombol cerah
+                        backgroundColor: const Color(0xFF6EC6F5),
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -404,7 +449,6 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
 
                   const SizedBox(height: 12),
 
-                  // Tombol Kembali
                   SizedBox(
                     width: double.infinity,
                     height: 55,

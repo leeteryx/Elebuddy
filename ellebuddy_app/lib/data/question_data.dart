@@ -22,16 +22,6 @@ class Question {
 
 final List<Question> screenerQuestions = [
   Question(
-    id: 'q1',
-    category: 'Preliminary',
-    text: 'Pilih usia anak anda',
-    subText:
-        'Ini akan membantu kami mempersonalisasi pengalaman aplikasi anak Anda',
-    imagePath: 'images/elephant_group.png',
-    type: QuestionType.ageSelection,
-    options: ['1-2 tahun', '3-4 tahun', '4-5 tahun'],
-  ),
-  Question(
     id: 'q2',
     category: 'Preliminary',
     text: 'Tingkat Kemampuan Berbicara',

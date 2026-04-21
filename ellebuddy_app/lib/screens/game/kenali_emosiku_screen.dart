@@ -188,7 +188,7 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
     );
   }
 
-  // ─── TOP BAR (UPDATED) ──────────────────────────────────────────────────────
+  // ─── TOP BAR ────────────────────────────────────────────────────────────────
 
   Widget _buildTopBar() {
     return Padding(
@@ -204,7 +204,6 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
             ),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          // Bagian Tengah: Judul dan Progress Soal
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -228,9 +227,7 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
                   ),
                 ],
               ),
-              const SizedBox(
-                height: 4,
-              ), // Jarak sedikit antara nama dan nomor soal
+              const SizedBox(height: 4),
               Text(
                 'Soal ${_currentIndex + 1} / ${moodQuestions.length}',
                 style: const TextStyle(
@@ -241,7 +238,6 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
               ),
             ],
           ),
-          // Spacer untuk menyeimbangkan posisi tengah karena ada tombol back di kiri
           const SizedBox(width: 48),
         ],
       ),
@@ -253,7 +249,6 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
   Widget _buildFinish() {
     final stars = _stars;
 
-    // Pesan berdasarkan jumlah bintang
     String message = 'Bagus sekali! 🎉';
     if (stars == moodQuestions.length) {
       message = 'Luar biasa! Sempurna! 🌟';
@@ -262,19 +257,16 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
     }
 
     return Scaffold(
-      backgroundColor: const Color(
-        0xFFC1F9D2,
-      ), // Warna hijau asli tetap dipertahankan
+      backgroundColor: const Color(0xFFC1F9D2),
       body: SafeArea(
         child: Column(
           children: [
-            _buildTopBar(), // Menampilkan TopBar konsisten
+            _buildTopBar(),
 
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Maskot Gajah Tengah
                   Image.asset(
                     'images/elephant_ball.png',
                     height: 180,
@@ -284,7 +276,6 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
 
                   const SizedBox(height: 30),
 
-                  // Teks Pesan Utama
                   Text(
                     message,
                     style: const TextStyle(
@@ -296,7 +287,6 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
 
                   const SizedBox(height: 10),
 
-                  // Sub-teks statistik
                   Text(
                     'Kamu dapat $stars dari ${moodQuestions.length} benar!',
                     style: const TextStyle(fontSize: 18, color: Colors.black54),
@@ -304,41 +294,47 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
 
                   const SizedBox(height: 30),
 
-                  // Barisan Bintang Besar
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(moodQuestions.length, (i) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Icon(
-                          i < stars ? Icons.star : Icons.star_border,
-                          size: 52,
-                          color: i < stars
-                              ? Colors.amber
-                              : Colors.white.withOpacity(0.6),
-                        ),
-                      );
-                    }),
+                  // ✅ BINTANG DINAMIS FINISH
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final starSize =
+                            (constraints.maxWidth / moodQuestions.length - 12)
+                                .clamp(24.0, 52.0);
+
+                        return Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: List.generate(moodQuestions.length, (i) {
+                            return Icon(
+                              i < stars ? Icons.star : Icons.star_border,
+                              size: starSize,
+                              color: i < stars
+                                  ? Colors.amber
+                                  : Colors.white.withOpacity(0.6),
+                            );
+                          }),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
             ),
 
-            // Bagian Tombol di Bawah (Dibuat memanjang sesuai gambar referensi)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
               child: Column(
                 children: [
-                  // Tombol Main Lagi
                   SizedBox(
                     width: double.infinity,
                     height: 55,
                     child: ElevatedButton(
                       onPressed: _restart,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(
-                          0xFFF9C846,
-                        ), // Warna kuning tombol asli
+                        backgroundColor: const Color(0xFFF9C846),
                         foregroundColor: Colors.black87,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -357,7 +353,6 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
 
                   const SizedBox(height: 12),
 
-                  // Tombol Selesai/Kembali
                   SizedBox(
                     width: double.infinity,
                     height: 55,
@@ -396,7 +391,7 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
 
     return Column(
       children: [
-        _buildTopBar(), // 🔥 sudah diganti
+        _buildTopBar(),
 
         Expanded(
           flex: 5,
@@ -433,20 +428,30 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
           ),
         ),
 
+        // ✅ PROGRESS BINTANG DINAMIS GAME
         Padding(
-          padding: const EdgeInsets.only(bottom: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(moodQuestions.length, (i) {
-              final earned = i < _stars;
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Text(
-                  earned ? '⭐' : '☆',
-                  style: const TextStyle(fontSize: 30),
-                ),
+          padding: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final starSize =
+                  (constraints.maxWidth / moodQuestions.length - 12).clamp(
+                    20.0,
+                    30.0,
+                  );
+
+              return Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 4,
+                runSpacing: 4,
+                children: List.generate(moodQuestions.length, (i) {
+                  final earned = i < _stars;
+                  return Text(
+                    earned ? '⭐' : '☆',
+                    style: TextStyle(fontSize: starSize),
+                  );
+                }),
               );
-            }),
+            },
           ),
         ),
       ],

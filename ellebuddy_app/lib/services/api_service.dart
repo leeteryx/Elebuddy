@@ -2,7 +2,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = "http://192.168.213.34:8000/api";
+  static const String baseUrl = "http://192.168.218.220:8000/api";
 
   // Header standar agar Laravel mengenali request sebagai JSON
   static Map<String, String> _getHeaders([String? token]) {

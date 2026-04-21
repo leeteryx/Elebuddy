@@ -26,25 +26,27 @@ class _PuzzleSosialPageState extends State<PuzzleSosialPage>
     with TickerProviderStateMixin {
   final List<SosialItem> items = [
     SosialItem(
-      situasi: 'Temanmu sedang berkelahi',
+      situasi: 'Temanmu sedang berkelahi, apa yang harus kamu lakukan?',
       gambarSoal: 'images/berantem.png',
       gambarBenar: 'images/melerai.png',
       gambarSalah: ['images/mendukung.png', 'images/malahnangis.png'],
     ),
     SosialItem(
-      situasi: 'Kamu membawa makanan lebih sedangkan temanmu tidak ',
+      situasi:
+          'Kamu membawa makanan lebih sedangkan temanmu tidak, apa yang harus kamu lakukan? ',
       gambarSoal: 'images/puzzleliatanakmakan.png',
       gambarBenar: 'images/puzzlebagimakanan.png',
-      gambarSalah: ['images/puzzlegmaubagi.jpeg', 'images/puzzlesembunyi.png'],
+      gambarSalah: ['images/puzzlegmaubagi.png', 'images/puzzlesembunyi.png'],
     ),
     SosialItem(
-      situasi: 'Setelah bermain',
-      gambarSoal: 'images/puzzle_main.jpeg',
+      situasi: 'Setelah bermain, apa yang harus kamu lakukan?',
+      gambarSoal: 'images/puzzle_main.png',
       gambarBenar: 'images/puzzle_beresin.png',
-      gambarSalah: ['images/puzzle_ninggalin.png', 'images/puzzle_injak.jpeg'],
+      gambarSalah: ['images/puzzle_ninggalin.png', 'images/puzzle_injak.png'],
     ),
     SosialItem(
-      situasi: 'Melihat kakek ingin menyeberang jalan',
+      situasi:
+          'Melihat kakek ingin menyeberang jalan, apa yang harus kamu lakukan?',
       gambarSoal: 'images/puzzlekakeknyebrang.png',
       gambarBenar: 'images/puzzlebantunyebrang.png',
       gambarSalah: [
@@ -53,7 +55,7 @@ class _PuzzleSosialPageState extends State<PuzzleSosialPage>
       ],
     ),
     SosialItem(
-      situasi: 'Melihat temanmu terjatuh',
+      situasi: 'Melihat temanmu terjatuh, apa yang harus kamu lakukan?',
       gambarSoal: 'images/puzzlejatuh.png',
       gambarBenar: 'images/puzzlebantujatuh.png',
       gambarSalah: ['images/puzzlediketawain.png', 'images/puzzlengefoto.png'],
@@ -95,11 +97,17 @@ class _PuzzleSosialPageState extends State<PuzzleSosialPage>
     _shuffleChoices();
   }
 
+  @override
+  void dispose() {
+    _feedbackCtrl.dispose();
+    _starCtrl.dispose();
+    super.dispose();
+  }
+
   void _shuffleChoices() {
     final item = items[_currentIndex];
     final choices = [item.gambarBenar, ...item.gambarSalah];
     choices.shuffle(Random());
-
     setState(() {
       _choices = choices;
     });
@@ -169,8 +177,10 @@ class _PuzzleSosialPageState extends State<PuzzleSosialPage>
             onPressed: () => Navigator.of(context).pop(),
           ),
           Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   const Text(
                     'EleBuddy',
@@ -180,6 +190,7 @@ class _PuzzleSosialPageState extends State<PuzzleSosialPage>
                   Image.asset('images/elephant_ball.png', height: 36),
                 ],
               ),
+              const SizedBox(height: 4),
               Text('Soal ${_currentIndex + 1} / ${items.length}'),
             ],
           ),
@@ -189,58 +200,142 @@ class _PuzzleSosialPageState extends State<PuzzleSosialPage>
     );
   }
 
-  // ✅ FINISH SAMA SEPERTI GAME KAMU
+  // ✅ FINISH SCREEN
   Widget _buildFinish() {
-    final messages = [
-      'Yuk coba lagi! 💪',
-      'Hampir! 🌈',
-      'Bagus! 🎉',
-      'Luar biasa! 🌟',
-      'Sempurna! 🏆',
-    ];
+    String message = 'Bagus sekali! 🎉';
+    if (_stars == items.length) {
+      message = 'Luar biasa! Sempurna! 🌟';
+    } else if (_stars == 0) {
+      message = 'Yuk coba lagi! 💪';
+    }
 
-    return Column(
-      children: [
-        _buildTopBar(),
-        Expanded(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  messages[_stars.clamp(0, messages.length - 1)],
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFE082),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildTopBar(),
+
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'images/elephant_ball.png',
+                    height: 180,
+                    errorBuilder: (_, __, ___) =>
+                        const Text('🐘', style: TextStyle(fontSize: 100)),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Text('$_stars dari ${items.length} benar'),
-                const SizedBox(height: 24),
 
-                // ⭐ BINTANG ICON
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(items.length, (i) {
-                    return Icon(
-                      i < _stars ? Icons.star : Icons.star_border,
-                      size: 42,
-                      color: i < _stars ? Colors.amber : Colors.grey,
-                    );
-                  }),
-                ),
+                  const SizedBox(height: 30),
 
-                const SizedBox(height: 32),
+                  Text(
+                    message,
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
 
-                ElevatedButton(
-                  onPressed: _restart,
-                  child: const Text('Main Lagi'),
-                ),
-              ],
+                  const SizedBox(height: 10),
+
+                  Text(
+                    'Kamu dapat $_stars dari ${items.length} benar!',
+                    style: const TextStyle(fontSize: 18, color: Colors.black54),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // ✅ BINTANG DINAMIS FINISH
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final starSize =
+                            (constraints.maxWidth / items.length - 12).clamp(
+                              24.0,
+                              52.0,
+                            );
+
+                        return Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: List.generate(items.length, (i) {
+                            return Icon(
+                              i < _stars ? Icons.star : Icons.star_border,
+                              size: starSize,
+                              color: i < _stars
+                                  ? Colors.amber
+                                  : Colors.white.withOpacity(0.6),
+                            );
+                          }),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    height: 55,
+                    child: ElevatedButton(
+                      onPressed: _restart,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFF9C846),
+                        foregroundColor: Colors.black87,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: const Text(
+                        'Main Lagi',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 55,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.white, width: 2),
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.white.withOpacity(0.2),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: const Text(
+                        'Selesai',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -259,14 +354,47 @@ class _PuzzleSosialPageState extends State<PuzzleSosialPage>
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
 
+        const SizedBox(height: 8),
+
+        // ✅ PROGRESS BINTANG DINAMIS - di bawah situasi
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final starSize = (constraints.maxWidth / items.length - 12).clamp(
+                18.0,
+                28.0,
+              );
+
+              return Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 4,
+                runSpacing: 4,
+                children: List.generate(items.length, (i) {
+                  final earned = i < _stars;
+                  return ScaleTransition(
+                    scale: (earned && i == _stars - 1)
+                        ? _starScale
+                        : const AlwaysStoppedAnimation(1.0),
+                    child: Text(
+                      earned ? '⭐' : '☆',
+                      style: TextStyle(fontSize: starSize),
+                    ),
+                  );
+                }),
+              );
+            },
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
         SizedBox(
-          height: screenHeight * 0.32,
+          height: screenHeight * 0.30,
           child: Stack(
             alignment: Alignment.center,
             children: [
               Image.asset(item.gambarSoal),
-
-              // ⭐ / ❌ FEEDBACK
               if (_answered)
                 ScaleTransition(
                   scale: _feedbackScale,
@@ -281,41 +409,29 @@ class _PuzzleSosialPageState extends State<PuzzleSosialPage>
 
         const SizedBox(height: 16),
 
+        // Layout 2 atas + 1 bawah
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(
-              _choices.length,
-              (i) => _buildChoiceButton(_choices[i]),
-            ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildChoiceButton(_choices[0]),
+                  const SizedBox(width: 16),
+                  _buildChoiceButton(_choices[1]),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [_buildChoiceButton(_choices[2])],
+              ),
+            ],
           ),
         ),
 
         const Spacer(),
-
-        // ⭐ PROGRESS BINTANG
-        Padding(
-          padding: const EdgeInsets.only(bottom: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(items.length, (i) {
-              final earned = i < _stars;
-              return ScaleTransition(
-                scale: (earned && i == _stars - 1)
-                    ? _starScale
-                    : const AlwaysStoppedAnimation(1.0),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Text(
-                    earned ? '⭐' : '☆',
-                    style: const TextStyle(fontSize: 30),
-                  ),
-                ),
-              );
-            }),
-          ),
-        ),
       ],
     );
   }
@@ -324,8 +440,8 @@ class _PuzzleSosialPageState extends State<PuzzleSosialPage>
     return GestureDetector(
       onTap: _answered ? null : () => _onAnswer(gambar),
       child: Container(
-        width: 100,
-        height: 90,
+        width: 130,
+        height: 115,
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.7),
           borderRadius: BorderRadius.circular(16),
