@@ -1,4 +1,4 @@
-import 'package:ellebuddy_app/screens/game/keranjang_petualangan.dart';
+import 'package:elebuddy_app/screens/game/keranjang_petualangan.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../widgets/constants.dart';
@@ -9,6 +9,7 @@ import 'game_petualangan_rutinitasku.dart';
 import 'puzzle_sosial_screen.dart';
 import '../../main.dart';
 import '../../services/streak_services.dart';
+import '../../widgets/hasil_game_section.dart';
 
 class GameMenuScreen extends StatefulWidget {
   const GameMenuScreen({super.key});
@@ -246,33 +247,11 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
     );
   }
 
-  // ─── HELPER: item hasil game di drawer ───────────────────────
-  Widget _buildHasilGameItem({
-    required IconData icon,
-    required String title,
-    required Color color,
-    required String hasil,
-  }) {
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: color,
-        child: Icon(icon, color: Colors.black54, size: 20),
-      ),
-      title: Text(title, style: const TextStyle(fontSize: 13)),
-      subtitle: Text(
-        hasil,
-        style: const TextStyle(fontSize: 12, color: Colors.grey),
-      ),
-    );
-  }
-
   // ─── HELPER: streak widget (Dinamis Sesuai Hari Ini) ──────────
   Widget _buildStreakSection() {
-    // Ambil data waktu sekarang
     final now = DateTime.now();
-    final currentWeekday = now.weekday; // 1 = Senin, ..., 7 = Minggu
+    final currentWeekday = now.weekday;
 
-    // Label hari sesuai urutan di Drawer kamu (Senin sampai Minggu)
     final List<String> daysLabel = ["S", "S", "R", "K", "J", "S", "M"];
 
     return Padding(
@@ -293,14 +272,7 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(7, (i) {
-              // Logika:
-              // i = indeks (0-6)
-              // currentWeekday = hari ini (1-7)
-              // index + 1 karena hari di Dart mulai dari 1 (Senin)
               final bool isToday = (i + 1) == currentWeekday;
-
-              // Streak aktif jika indeks kurang dari atau sama dengan hari ini (asumsi user login tiap hari)
-              // Atau kamu bisa tetap pakai _streakCount kamu jika ingin data dari database
               final bool isActive = (i + 1) <= _streakCount;
 
               return Column(
@@ -310,7 +282,6 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
                     height: 32,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      // Warna primer jika hari ini, warna pudar jika sudah lewat, abu-abu jika belum
                       color: isToday
                           ? AppColors.primary
                           : (isActive
@@ -334,13 +305,10 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  // Munculkan bintang hanya di hari ini
                   if (isToday)
                     const Icon(Icons.star, size: 12, color: Colors.amber)
                   else
-                    const SizedBox(
-                      height: 12,
-                    ), // Placeholder biar jarak tetap sama
+                    const SizedBox(height: 12),
                 ],
               );
             }),
@@ -349,7 +317,7 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
           Text(
             _streakCompleted
                 ? "🎉 Streak 7 hari tercapai!"
-                : "$currentWeekday/7 hari — terus semangat!", // Teks ikut hari sekarang
+                : "$currentWeekday/7 hari — terus semangat!",
             style: TextStyle(
               fontSize: 12,
               color: _streakCompleted ? AppColors.primary : Colors.grey,
@@ -381,7 +349,7 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
         elevation: 0,
         iconTheme: IconThemeData(color: Theme.of(context).iconTheme.color),
         title: Text(
-          "ElleBuddy",
+          "elebuddy",
           style: TextStyle(
             color: Theme.of(context).textTheme.bodyLarge?.color,
             fontWeight: FontWeight.bold,
@@ -439,49 +407,13 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
 
               const Divider(),
 
-              // ── Hasil Game ──
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "HASIL GAME",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                ),
+              // HASIL GAME DENGAN DATA DINAMIS DARI DATABASE
+              const Expanded(
+                // Menggunakan Expanded agar bisa di-scroll jika layar kecil
+                child: SingleChildScrollView(child: HasilGameSection()),
               ),
 
-              _buildHasilGameItem(
-                icon: Icons.directions_run,
-                title: "Petualangan Rutinitasku",
-                color: const Color(0xFF9ED0FF),
-                hasil: "Belum dimainkan",
-              ),
-              _buildHasilGameItem(
-                icon: Icons.extension,
-                title: "Puzzle Sosial",
-                color: const Color(0xFFFFE082),
-                hasil: "Belum dimainkan",
-              ),
-              _buildHasilGameItem(
-                icon: Icons.emoji_emotions,
-                title: "Kenali Emosiku",
-                color: const Color(0xFFC1F9D2),
-                hasil: "Belum dimainkan",
-              ),
-              _buildHasilGameItem(
-                icon: Icons.shopping_basket,
-                title: "Keranjang Petualangan",
-                color: const Color(0xFFF0C1F9),
-                hasil: "Belum dimainkan",
-              ),
-
-              const Spacer(),
+              const Divider(),
 
               // ── Dark mode toggle ──
               Builder(

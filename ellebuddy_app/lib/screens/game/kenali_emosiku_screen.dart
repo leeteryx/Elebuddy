@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/api_service.dart';
 
 // ─── DATA MODEL ───────────────────────────────────────────────────────────────
 
@@ -21,56 +22,56 @@ class MoodQuestion {
 // ─── DATA SOAL ────────────────────────────────────────────────────────────────
 
 final List<MoodQuestion> moodQuestions = [
-  MoodQuestion(
+  const MoodQuestion(
     id: 'mq1',
     mood: 'Marah',
     imagePath: 'images/marah.png',
     correctEmojiImage: 'images/emomarah.png',
     wrongEmojiImage: 'images/emosenang.png',
   ),
-  MoodQuestion(
+  const MoodQuestion(
     id: 'mq2',
     mood: 'Senang',
     imagePath: 'images/senang.png',
     correctEmojiImage: 'images/emosenang.png',
     wrongEmojiImage: 'images/emonangis.png',
   ),
-  MoodQuestion(
+  const MoodQuestion(
     id: 'mq3',
     mood: 'Sedih',
     imagePath: 'images/nangis.png',
     correctEmojiImage: 'images/emonangis.png',
     wrongEmojiImage: 'images/emotakut.png',
   ),
-  MoodQuestion(
+  const MoodQuestion(
     id: 'mq4',
     mood: 'Takut',
     imagePath: 'images/takut.png',
     correctEmojiImage: 'images/emotakut.png',
     wrongEmojiImage: 'images/emokaget.png',
   ),
-  MoodQuestion(
+  const MoodQuestion(
     id: 'mq5',
     mood: 'Kaget',
     imagePath: 'images/kaget.png',
     correctEmojiImage: 'images/emokaget.png',
     wrongEmojiImage: 'images/emomarah.png',
   ),
-  MoodQuestion(
+  const MoodQuestion(
     id: 'mq6',
     mood: 'Malu',
     imagePath: 'images/anak_malu.png',
     correctEmojiImage: 'images/emosi_malu.png',
     wrongEmojiImage: 'images/emosi_bingung.png',
   ),
-  MoodQuestion(
+  const MoodQuestion(
     id: 'mq7',
     mood: 'Bingung',
     imagePath: 'images/anak_bingung.png',
     correctEmojiImage: 'images/emosi_bingung.png',
     wrongEmojiImage: 'images/emosi_malu.png',
   ),
-  MoodQuestion(
+  const MoodQuestion(
     id: 'mq8',
     mood: 'Terkejut',
     imagePath: 'images/anak_terkejut.png',
@@ -135,6 +136,26 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
     _choices = [q.correctEmojiImage, q.wrongEmojiImage]..shuffle();
   }
 
+  Future<void> _saveScore(int finalScore) async {
+    try {
+      final response = await ApiService.saveGameScore(
+        "Kenali Emosiku",
+        finalScore,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        debugPrint(
+          'Sukses: Skor Kenali Emosi ($finalScore) berhasil disimpan!',
+        );
+      } else {
+        debugPrint(
+          'Gagal menyimpan: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error koneksi saat menyimpan skor: $e');
+    }
+  }
+
   void _onAnswer(String emojiImagePath) {
     if (_answered) return;
     final q = moodQuestions[_currentIndex];
@@ -162,6 +183,9 @@ class _KenaliEmosikuScreenState extends State<KenaliEmosikuScreen>
         _starCtrl.reset();
       } else {
         setState(() => _gameFinished = true);
+
+        // Memanggil API penyimpanan skor saat game selesai
+        _saveScore(_stars);
       }
     });
   }

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import '../../services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-// Import file pendukung kamu
 import '../../widgets/constants.dart';
 import '../../widgets/custom_input.dart';
 
@@ -91,7 +89,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: AppBar(
-        title: const Text("Daftar Akun ElleBuddy"),
+        title: const Text("Daftar Akun elebuddy"),
         backgroundColor: AppColors.primary,
         elevation: 0,
       ),

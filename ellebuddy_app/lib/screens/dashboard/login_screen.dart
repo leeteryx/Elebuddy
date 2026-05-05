@@ -44,6 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
         // 2. Simpan Token dari Laravel (PENTING untuk akses fitur lain)
         await prefs.setString('token', data['token']);
         await prefs.setBool('isLoggedIn', true);
+        await prefs.setInt('user_id_key', data['user']['id']);
 
         // 3. Ambil status skrining langsung dari database Laravel
         // Laravel mengirimkan 0 atau 1, kita ubah ke bool

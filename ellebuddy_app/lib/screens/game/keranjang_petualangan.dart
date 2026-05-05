@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
+import '../../services/api_service.dart';
 
 // ─── MODEL ─────────────────────────────────────────────
 
@@ -137,6 +138,24 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
     super.dispose();
   }
 
+  Future<void> _saveScore(int finalScore) async {
+    try {
+      final response = await ApiService.saveGameScore(
+        "Keranjang Petualangan",
+        finalScore,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        debugPrint('Sukses: Skor $finalScore berhasil disimpan ke Laravel!');
+      } else {
+        debugPrint(
+          'Gagal menyimpan: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error koneksi saat menyimpan skor: $e');
+    }
+  }
+
   void _onAnswer(bool correct) {
     if (_answered) return;
 
@@ -162,6 +181,7 @@ class _KeranjangPetualanganScreenState extends State<KeranjangPetualanganScreen>
         _starCtrl.reset();
       } else {
         setState(() => _finished = true);
+        _saveScore(_stars);
       }
     });
   }

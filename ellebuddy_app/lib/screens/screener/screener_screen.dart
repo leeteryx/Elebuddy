@@ -83,7 +83,7 @@ class _ScreenerScreenState extends State<ScreenerScreen> {
               ),
             ),
 
-            // FOOTER: Logo ElleBuddy
+            // FOOTER: Logo elebuddy
             _buildFooter(),
           ],
         ),
@@ -262,7 +262,7 @@ class _ScreenerScreenState extends State<ScreenerScreen> {
       child: Column(
         children: [
           const Text(
-            "ElleBuddy",
+            "elebuddy",
             style: TextStyle(fontSize: 10, color: Colors.grey),
           ),
           const SizedBox(height: 5),

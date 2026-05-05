@@ -1,4 +1,4 @@
-# ellebuddy_app
+# elebuddy_app
 
 A new Flutter project.
 

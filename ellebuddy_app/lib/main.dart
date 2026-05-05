@@ -52,7 +52,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'ElleBuddy',
+      title: 'elebuddy',
       theme: ThemeData(
         primarySwatch: Colors.cyan,
         brightness: Brightness.light,

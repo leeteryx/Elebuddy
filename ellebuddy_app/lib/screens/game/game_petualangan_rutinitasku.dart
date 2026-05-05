@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import '../../services/api_service.dart';
 
 class GameItem {
   final String nama;
@@ -18,13 +19,13 @@ class PetualanganRutinitaskuPage extends StatefulWidget {
 class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
     with TickerProviderStateMixin {
   final List<GameItem> items = [
-    GameItem('Bangun Tidur', 'images/bangun_tidur.png'),
-    GameItem('Sikat Gigi', 'images/sikat_gigi.png'),
-    GameItem('Cuci Tangan', 'images/cuci_tangan.png'),
-    GameItem('Sarapan', 'images/sarapan.png'),
-    GameItem('Menyapu', 'images/menyapu.png'),
-    GameItem('Membaca Buku', 'images/baca_buku.png'),
-    GameItem('Gosok Gigi', 'images/gosok_gigi.png'),
+    const GameItem('Bangun Tidur', 'images/bangun_tidur.png'),
+    const GameItem('Sikat Gigi', 'images/sikat_gigi.png'),
+    const GameItem('Cuci Tangan', 'images/cuci_tangan.png'),
+    const GameItem('Sarapan', 'images/sarapan.png'),
+    const GameItem('Menyapu', 'images/menyapu.png'),
+    const GameItem('Membaca Buku', 'images/baca_buku.png'),
+    const GameItem('Gosok Gigi', 'images/gosok_gigi.png'),
   ];
 
   int _currentIndex = 0;
@@ -75,6 +76,24 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
     _choices = ([correct, ...others.take(3)])..shuffle(Random());
   }
 
+  Future<void> _saveScore(int finalScore) async {
+    try {
+      final response = await ApiService.saveGameScore(
+        "Petualangan Rutinitasku",
+        finalScore,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        debugPrint('Sukses: Skor $finalScore berhasil disimpan ke Laravel!');
+      } else {
+        debugPrint(
+          'Gagal menyimpan: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error koneksi saat menyimpan skor: $e');
+    }
+  }
+
   void _onAnswer(String selectedGambar) {
     if (_answered) return;
     final correct = selectedGambar == items[_currentIndex].gambar;
@@ -101,6 +120,9 @@ class _PetualanganRutinitaskuState extends State<PetualanganRutinitaskuPage>
         _starCtrl.reset();
       } else {
         setState(() => _gameFinished = true);
+
+        // Memanggil API saat soal sudah habis
+        _saveScore(_stars);
       }
     });
   }

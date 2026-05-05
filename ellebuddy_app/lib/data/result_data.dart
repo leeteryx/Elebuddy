@@ -22,7 +22,7 @@ final Map<String, ScreeningResult> resultOptions = {
     title:
         "Hebat! Perkembangan si kecil saat ini sudah sesuai dengan tahapan usianya",
     description:
-        "Tetap berikan stimulasi melalui game di ElleBuddy untuk menjaga progresnya!",
+        "Tetap berikan stimulasi melalui game di elebuddy untuk menjaga progresnya!",
     subDescription: "", // Kosongkan jika tidak ada
     imagePath: "images/result_excellent.png",
     themeColor: const Color(0xFF23A1B1),
@@ -38,7 +38,7 @@ final Map<String, ScreeningResult> resultOptions = {
   ),
   'danger': ScreeningResult(
     title:
-        "ElleBuddy menyarankan Ayah/Bunda untuk melakukan konsultasi lebih lanjut dengan tenaga profesional",
+        "elebuddy menyarankan Ayah/Bunda untuk melakukan konsultasi lebih lanjut dengan tenaga profesional",
     description:
         "Hasil ini adalah skrining awal, bukan diagnosis final. Segera buat janji dengan tenaga profesional.",
     subDescription: "",

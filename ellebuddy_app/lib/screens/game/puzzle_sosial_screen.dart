@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import '../../services/api_service.dart';
 
 class SosialItem {
   final String situasi;
@@ -113,6 +114,24 @@ class _PuzzleSosialPageState extends State<PuzzleSosialPage>
     });
   }
 
+  Future<void> _saveScore(int finalScore) async {
+    try {
+      final response = await ApiService.saveGameScore(
+        "Puzzle Sosial",
+        finalScore,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        debugPrint('Sukses: Skor $finalScore berhasil disimpan ke Laravel!');
+      } else {
+        debugPrint(
+          'Gagal menyimpan: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error koneksi saat menyimpan skor: $e');
+    }
+  }
+
   void _onAnswer(String selected) {
     if (_answered) return;
 
@@ -141,6 +160,7 @@ class _PuzzleSosialPageState extends State<PuzzleSosialPage>
         _starCtrl.reset();
       } else {
         setState(() => _gameFinished = true);
+        _saveScore(_stars);
       }
     });
   }

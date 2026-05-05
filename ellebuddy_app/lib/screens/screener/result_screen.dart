@@ -130,7 +130,7 @@ class ResultScreen extends StatelessWidget {
               Column(
                 children: [
                   const Text(
-                    "ElleBuddy",
+                    "elebuddy",
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey,

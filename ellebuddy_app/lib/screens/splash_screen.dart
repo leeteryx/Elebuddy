@@ -34,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             // Nama Aplikasi
             const Text(
-              "ElleBuddy",
+              "elebuddy",
               style: AppTextStyle.brandTitle, // Gunakan gaya teks brand kita
             ),
 
