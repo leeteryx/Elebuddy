@@ -1,22 +1,27 @@
-import 'dart:convert'; // Tambahkan ini untuk membaca JSON (jsonDecode)
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = "http://localhost:8000/api";  
+  static const String baseUrl = "http://localhost:8000/api";
 
-  // Header standar agar Laravel mengenali request sebagai JSON
   static Map<String, String> _getHeaders([String? token]) {
     Map<String, String> headers = {'Accept': 'application/json'};
-
-    if (token != null) {
-      headers['Authorization'] = 'Bearer $token';
-    }
-
+    if (token != null) headers['Authorization'] = 'Bearer $token';
     return headers;
   }
 
-  // --- 1. FUNGSI REGISTER ---
+  static Future<String?> _getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
+  }
+
+  static Future<int?> _getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('user_id_key');
+  }
+
+  // ── 1. REGISTER ─────────────────────────────────────────────────────────
   static Future<http.Response> register({
     required String parentName,
     required String email,
@@ -38,7 +43,7 @@ class ApiService {
     );
   }
 
-  // --- 2. FUNGSI LOGIN ---
+  // ── 2. LOGIN ─────────────────────────────────────────────────────────────
   static Future<http.Response> login(String email, String password) async {
     final url = Uri.parse("$baseUrl/login");
     return await http.post(
@@ -48,27 +53,18 @@ class ApiService {
     );
   }
 
-  // --- 3. FUNGSI UPDATE STATUS SKRINING ---
+  // ── 3. UPDATE STATUS SKRINING ────────────────────────────────────────────
   static Future<http.Response> updateScreeningStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-
+    final token = await _getToken();
     final url = Uri.parse("$baseUrl/update-screening");
-    return await http.post(
-      url,
-      headers: _getHeaders(token), // Mengirimkan Token Sanctum
-    );
+    return await http.post(url, headers: _getHeaders(token));
   }
 
-  // --- 4. FUNGSI SIMPAN SKOR GAME ---
+  // ── 4. SIMPAN SKOR GAME ──────────────────────────────────────────────────
   static Future<http.Response> saveGameScore(String gameName, int score) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final token = await _getToken();
+    final userId = await _getUserId();
 
-    // Ambil ID user dari SharedPreferences (disimpan saat login)
-    final userId = prefs.getInt('user_id_key');
-
-    // Mencegah pengiriman jika tidak ada user yang login
     if (userId == null) {
       throw Exception("User ID tidak ditemukan. Pastikan sudah login.");
     }
@@ -79,19 +75,18 @@ class ApiService {
       headers: _getHeaders(token),
       body: {
         'user_id': userId.toString(),
-        'game_name': gameName, // <-- Data nama game dikirim
+        'game_name': gameName,
         'score': score.toString(),
       },
     );
   }
 
-  // --- 5. FUNGSI MENGAMBIL HASIL GAME ---
+  // ── 5. AMBIL HASIL GAME ──────────────────────────────────────────────────
   static Future<Map<String, int>> getGameResults() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    final userId = prefs.getInt('user_id_key');
+    final token = await _getToken();
+    final userId = await _getUserId();
 
-    if (userId == null) return {}; // Kembalikan kosong jika belum login
+    if (userId == null) return {};
 
     final url = Uri.parse("$baseUrl/get-game-results");
 
@@ -105,16 +100,69 @@ class ApiService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         Map<String, int> resultMap = {};
-
-        // Memasukkan data ke dalam format Map { "Nama Game": Skor }
         for (var item in data['data']) {
           resultMap[item['game_name']] = item['score'];
         }
         return resultMap;
       }
     } catch (e) {
-      print("Error fetching game results: $e");
+      print("Error getGameResults: $e");
     }
     return {};
+  }
+
+  // ── 6. AMBIL PROFIL ANAK ─────────────────────────────────────────────────
+  static Future<Map<String, dynamic>?> getProfilAnak() async {
+    final token = await _getToken();
+
+    if (token == null) return null;
+
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/profil-anak"),
+        headers: _getHeaders(token),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['data'] as Map<String, dynamic>;
+      }
+    } catch (e) {
+      print("Error getProfilAnak: $e");
+    }
+    return null;
+  }
+
+  // ── 7. UPDATE PROFIL ANAK ────────────────────────────────────────────────
+  static Future<bool> updateProfilAnak({
+    required String childName,
+    required int childAge,
+    required String childGender, // 'L' atau 'P'
+    required String childNotes,
+  }) async {
+    final token = await _getToken();
+
+    if (token == null) return false;
+
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/profil-anak"),
+        headers: _getHeaders(token),
+        body: {
+          'child_name': childName,
+          'child_age': childAge.toString(),
+          'child_gender': childGender,
+          'child_notes': childNotes,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['success'] == true;
+      }
+    } catch (e) {
+      print("Error updateProfilAnak: $e");
+    }
+    return false;
   }
 }

@@ -30,7 +30,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // Kalau belum pernah set → ikut sistem HP
     if (widget.savedTheme == 'dark') {
       _themeMode = ThemeMode.dark;
     } else if (widget.savedTheme == 'light') {

@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../widgets/constants.dart';
 import '../../widgets/game_card.dart';
 import '../../screens/dashboard/login_screen.dart';
+import '../../screens/dashboard/profil_anak_screen.dart';
+import '../../screens/dashboard/perkembangan_screen.dart';
 import 'kenali_emosiku_screen.dart';
 import 'game_petualangan_rutinitasku.dart';
 import 'puzzle_sosial_screen.dart';
@@ -164,9 +166,39 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  // ─── TAB 1: EXPLORE ──────────────────────────────────────────
+  Widget _buildExploreTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: const Text(
+              "Ayo belajar!",
+              style: TextStyle(
+                color: AppColors.accent,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: 30),
           GameCard(
             title: "Belajar Huruf & Angka",
-            imagePath: "images/game_huruf_angka.png",
+            placeholderIcon: Icons.abc_rounded,
             backgroundColor: const Color(0xFFD6CCFF),
             onTap: () => Navigator.push(
               context,
@@ -181,25 +213,7 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
     );
   }
 
-  // ─── TAB 1 & 2: COMING SOON ──────────────────────────────────
-  Widget _buildComingSoon(String label) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.construction, size: 60, color: Colors.grey),
-          const SizedBox(height: 12),
-          Text(
-            "$label\nSegera hadir!",
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ─── TAB 3: ACCOUNT ──────────────────────────────────────────
+  // ─── TAB 2: ACCOUNT ──────────────────────────────────────────
   Widget _buildAccountTab() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -226,13 +240,19 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
             leading: const Icon(Icons.person_outline, color: AppColors.primary),
             title: const Text("Profil Anak"),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ProfilAnakScreen()),
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.bar_chart, color: AppColors.primary),
             title: const Text("Perkembangan"),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const PerkembanganScreen()),
+            ),
           ),
           const Divider(),
           const SizedBox(height: 8),
@@ -259,11 +279,10 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
     );
   }
 
-  // ─── HELPER: streak widget (Dinamis Sesuai Hari Ini) ──────────
+  // ─── HELPER: streak widget ────────────────────────────────────
   Widget _buildStreakSection() {
     final now = DateTime.now();
     final currentWeekday = now.weekday;
-
     final List<String> daysLabel = ["S", "S", "R", "K", "J", "S", "M"];
 
     return Padding(
@@ -347,8 +366,7 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
   Widget build(BuildContext context) {
     final List<Widget> tabs = [
       _buildGameTab(),
-      _buildComingSoon("Explore"),
-      _buildComingSoon("Shorts"),
+      _buildExploreTab(),
       _buildAccountTab(),
     ];
 
@@ -375,7 +393,6 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              // Header profil
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(
@@ -411,23 +428,13 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 4),
-
-              // ── Streak ──
               _buildStreakSection(),
-
               const Divider(),
-
-              // HASIL GAME DENGAN DATA DINAMIS DARI DATABASE
               const Expanded(
-                // Menggunakan Expanded agar bisa di-scroll jika layar kecil
                 child: SingleChildScrollView(child: HasilGameSection()),
               ),
-
               const Divider(),
-
-              // ── Dark mode toggle ──
               Builder(
                 builder: (context) {
                   final isDark =
@@ -446,10 +453,7 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
                   );
                 },
               ),
-
               const Divider(),
-
-              // ── Logout ──
               ListTile(
                 leading: const Icon(Icons.logout, color: Colors.redAccent),
                 title: const Text(
@@ -480,10 +484,6 @@ class _GameMenuScreenState extends State<GameMenuScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.games), label: "Game"),
           BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Explore"),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.play_circle_outline),
-            label: "Shorts",
-          ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Account"),
         ],
       ),
