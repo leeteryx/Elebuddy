@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../data/alphabet_number_data.dart';
 
 class AlphabetNumberGameScreen extends StatefulWidget {
@@ -16,18 +17,62 @@ class _AlphabetNumberGameScreenState extends State<AlphabetNumberGameScreen>
     with TickerProviderStateMixin {
   final FlutterTts _flutterTts = FlutterTts();
 
-  bool _isAlphabetMode = true; // true = Alphabet, false = Numbers
+  bool _isAlphabetMode = true;
   int? _selectedIndex;
   bool _isSpeaking = false;
 
   late AnimationController _bounceController;
   late Animation<double> _bounceAnimation;
 
+  // Mapping icon FontAwesome untuk huruf
+  static final Map<String, IconData> alphabetIcons = {
+    'A': FontAwesomeIcons.apple,
+    'B': FontAwesomeIcons.book,
+    'C': FontAwesomeIcons.bug,
+    'D': FontAwesomeIcons.hippo,
+    'E': FontAwesomeIcons.dove,
+    'F': FontAwesomeIcons.camera,
+    'G': FontAwesomeIcons.horse,
+    'H': FontAwesomeIcons.cat,
+    'I': FontAwesomeIcons.fish,
+    'J': FontAwesomeIcons.horse,
+    'K': FontAwesomeIcons.cat,
+    'L': FontAwesomeIcons.paw,
+    'M': FontAwesomeIcons.sun,
+    'N': FontAwesomeIcons.leaf,
+    'O': FontAwesomeIcons.water,
+    'P': FontAwesomeIcons.tree,
+    'Q': FontAwesomeIcons.flag,
+    'R': FontAwesomeIcons.dog,
+    'S': FontAwesomeIcons.crown,
+    'T': FontAwesomeIcons.paw,
+    'U': FontAwesomeIcons.shrimp,
+    'V': FontAwesomeIcons.music,
+    'W': FontAwesomeIcons.carrot,
+    'X': FontAwesomeIcons.music,
+    'Y': FontAwesomeIcons.glassWater,
+    'Z': FontAwesomeIcons.horse,
+  };
+
+  // Mapping icon FontAwesome untuk angka
+  static final Map<String, IconData> numberIcons = {
+    '0': FontAwesomeIcons.ban,
+    '1': FontAwesomeIcons.apple,
+    '2': FontAwesomeIcons.star,
+    '3': FontAwesomeIcons.futbol,
+    '4': FontAwesomeIcons.hippo,
+    '5': FontAwesomeIcons.hand,
+    '6': FontAwesomeIcons.egg,
+    '7': FontAwesomeIcons.cloudSun,
+    '8': FontAwesomeIcons.spider,
+    '9': FontAwesomeIcons.globe,
+    '10': FontAwesomeIcons.hands,
+  };
+
   @override
   void initState() {
     super.initState();
     _initTts();
-
     _bounceController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -42,31 +87,19 @@ class _AlphabetNumberGameScreenState extends State<AlphabetNumberGameScreen>
     await _flutterTts.setSpeechRate(0.45);
     await _flutterTts.setVolume(1.0);
     await _flutterTts.setPitch(1.1);
-
     _flutterTts.setCompletionHandler(() {
-      if (mounted) {
-        setState(() => _isSpeaking = false);
-      }
+      if (mounted) setState(() => _isSpeaking = false);
     });
   }
 
   Future<void> _speak(AlphabetNumberItem item, int index) async {
-    if (_isSpeaking) {
-      await _flutterTts.stop();
-    }
-
+    if (_isSpeaking) await _flutterTts.stop();
     setState(() {
       _selectedIndex = index;
       _isSpeaking = true;
     });
-
     _bounceController.forward().then((_) => _bounceController.reverse());
-
-    final String textToSpeak = _isAlphabetMode
-        ? '${item.name}. ${item.example}'
-        : '${item.name}. ${item.example}';
-
-    await _flutterTts.speak(textToSpeak);
+    await _flutterTts.speak('${item.name}. ${item.example}');
   }
 
   @override
@@ -129,15 +162,19 @@ class _AlphabetNumberGameScreenState extends State<AlphabetNumberGameScreen>
         ),
         child: Row(
           children: [
-            Expanded(child: _toggleButton('🔤 Huruf', true)),
-            Expanded(child: _toggleButton('🔢 Angka', false)),
+            Expanded(
+              child: _toggleButton('Huruf', FontAwesomeIcons.font, true),
+            ),
+            Expanded(
+              child: _toggleButton('Angka', FontAwesomeIcons.hashnode, false),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _toggleButton(String label, bool isAlphabet) {
+  Widget _toggleButton(String label, IconData icon, bool isAlphabet) {
     final bool isActive = _isAlphabetMode == isAlphabet;
     return GestureDetector(
       onTap: () {
@@ -163,15 +200,24 @@ class _AlphabetNumberGameScreenState extends State<AlphabetNumberGameScreen>
                 ]
               : [],
         ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FaIcon(
+              icon,
+              size: 14,
               color: isActive ? Colors.white : const Color(0xFF6C63FF),
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
             ),
-          ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: isActive ? Colors.white : const Color(0xFF6C63FF),
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -179,6 +225,10 @@ class _AlphabetNumberGameScreenState extends State<AlphabetNumberGameScreen>
 
   Widget _buildSelectedCard(List<AlphabetNumberItem> items) {
     final item = items[_selectedIndex!];
+    final iconData = _isAlphabetMode
+        ? alphabetIcons[item.symbol]
+        : numberIcons[item.symbol];
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       margin: const EdgeInsets.fromLTRB(20, 0, 20, 12),
@@ -233,10 +283,11 @@ class _AlphabetNumberGameScreenState extends State<AlphabetNumberGameScreen>
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Row(
                   children: [
-                    Text(item.emoji, style: const TextStyle(fontSize: 18)),
+                    if (iconData != null)
+                      FaIcon(iconData, size: 16, color: Colors.white),
                     const SizedBox(width: 6),
                     Text(
                       item.example,
@@ -253,11 +304,13 @@ class _AlphabetNumberGameScreenState extends State<AlphabetNumberGameScreen>
           // Speaker icon
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
-            child: Icon(
-              _isSpeaking ? Icons.volume_up_rounded : Icons.volume_up_outlined,
+            child: FaIcon(
+              _isSpeaking
+                  ? FontAwesomeIcons.volumeHigh
+                  : FontAwesomeIcons.volumeLow,
               key: ValueKey(_isSpeaking),
               color: Colors.white,
-              size: 32,
+              size: 28,
             ),
           ),
         ],
@@ -273,7 +326,7 @@ class _AlphabetNumberGameScreenState extends State<AlphabetNumberGameScreen>
         crossAxisCount: crossAxisCount,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        childAspectRatio: _isAlphabetMode ? 0.85 : 1.0,
+        childAspectRatio: _isAlphabetMode ? 0.78 : 1.0,
       ),
       itemCount: items.length,
       itemBuilder: (context, index) {
@@ -285,7 +338,6 @@ class _AlphabetNumberGameScreenState extends State<AlphabetNumberGameScreen>
   }
 
   Widget _buildItemCard(AlphabetNumberItem item, int index, bool isSelected) {
-    // Rotating color palette for cards
     final List<List<Color>> gradients = [
       [const Color(0xFFFF6B6B), const Color(0xFFFF8E53)],
       [const Color(0xFF4ECDC4), const Color(0xFF44A08D)],
@@ -295,6 +347,10 @@ class _AlphabetNumberGameScreenState extends State<AlphabetNumberGameScreen>
       [const Color(0xFFCFDEF3), const Color(0xFFE0C3FC)],
     ];
     final gradient = gradients[index % gradients.length];
+
+    final iconData = _isAlphabetMode
+        ? alphabetIcons[item.symbol]
+        : numberIcons[item.symbol];
 
     return GestureDetector(
       onTap: () => _speak(item, index),
@@ -327,12 +383,17 @@ class _AlphabetNumberGameScreenState extends State<AlphabetNumberGameScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(item.emoji, style: const TextStyle(fontSize: 22)),
-            const SizedBox(height: 4),
+            if (iconData != null)
+              FaIcon(
+                iconData,
+                size: _isAlphabetMode ? 18 : 22,
+                color: Colors.white.withOpacity(0.95),
+              ),
+            SizedBox(height: _isAlphabetMode ? 3 : 4),
             Text(
               item.symbol,
               style: TextStyle(
-                fontSize: _isAlphabetMode ? 30 : 34,
+                fontSize: _isAlphabetMode ? 26 : 34,
                 fontWeight: FontWeight.w900,
                 color: Colors.white,
                 shadows: [
@@ -344,12 +405,12 @@ class _AlphabetNumberGameScreenState extends State<AlphabetNumberGameScreen>
                 ],
               ),
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: _isAlphabetMode ? 2 : 3),
             Text(
               item.name,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: _isAlphabetMode ? 10 : 12,
+                fontSize: _isAlphabetMode ? 9 : 12,
                 fontWeight: FontWeight.bold,
                 color: Colors.white.withOpacity(0.95),
               ),
