@@ -3,7 +3,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = "http://192.168.1.79:8000/api";
+  static const String baseUrl = "http://192.168.214.38:8000/api"; //HP
+  // "http://10.0.2.2:8000/api"; //emulator android
 
   static Map<String, String> _getHeaders([String? token]) {
     Map<String, String> headers = {'Accept': 'application/json'};
